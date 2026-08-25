@@ -480,7 +480,8 @@
   const CHAPTERS_API = "https://api.quran.com/api/v4/chapters?language=en";
   function juzUrl(j, page){
     return "https://api.quran.com/api/v4/verses/by_juz/" + j +
-      "?language=en&words=true&word_fields=text_uthmani,line_number,page_number,char_type_name" +
+      "?language=en&words=true" + 
+      "&word_fields=verse_key,verse_id,page_number,location,text_uthmani,text_imlaei_simple,code_v2,qpc_uthmani_hafs" +
       "&fields=verse_key,sajdah_number&per_page=400&page=" + page;
   }
   const TOTAL_PAGES = 604;
