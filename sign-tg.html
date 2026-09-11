@@ -1,0 +1,82 @@
+<!-- Tombol Login / Logout -->
+<button id="loginBtn">Login dengan Google</button>
+<button id="logoutBtn" style="display:none;">Logout</button>
+<div id="userInfo"></div>
+
+<script type="module">
+  // Import Firebase SDK langsung dari CDN
+  import { initializeApp } from "https://gstatic.com";
+  import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://gstatic.com";
+  import { getFirestore, doc, setDoc, getDoc } from "https://gstatic.com";
+
+  // Konfigurasi Firebase Anda
+  const firebaseConfig = {
+    apiKey: "AIzaSy...",
+    authDomain: "://firebaseapp.com",
+    projectId: "project-anda",
+    storageBucket: "://appspot.com",
+    messagingSenderId: "...",
+    appId: "..."
+  };
+
+  // Inisialisasi
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+  const provider = new GoogleAuthProvider();
+
+  // Elemen DOM
+  const loginBtn = document.getElementById('loginBtn');
+  const logoutBtn = document.getElementById('logoutBtn');
+  const userInfo = document.getElementById('userInfo');
+
+  // 1. Fungsi Login dengan Google (Popup)
+  loginBtn.addEventListener('click', async () => {
+    try {
+      const result = await signInWithPopup(auth, provider);
+      console.log("User berhasil login:", result.user);
+    } catch (error) {
+      console.error("Gagal login Google:", error);
+    }
+  });
+
+  // 2. Fungsi Logout
+  logoutBtn.addEventListener('click', () => {
+    signOut(auth);
+  });
+
+  // 3. Memantau Status Login User & Migrasi Setelan
+  onAuthStateChanged(auth, async (user) => {
+    if (user) {
+      // Jika user sudah login
+      loginBtn.style.display = 'none';
+      logoutBtn.style.display = 'block';
+      userInfo.innerText = `Halo, ${user.displayName}`;
+
+      // Jalankan fungsi migrasi dari localStorage ke Firestore
+      await migrateSettingsToFirebase(user.uid);
+    } else {
+      // Jika user belum login / sudah logout
+      loginBtn.style.display = 'block';
+      logoutBtn.style.display = 'none';
+      userInfo.innerText = '';
+    }
+  });
+
+  // 4. Fungsi Migrasi Data (seperti pembahasan sebelumnya)
+  async function migrateSettingsToFirebase(userId) {
+    const localSettingsRaw = localStorage.getItem("user_settings"); // sesuaikan key-nya
+    if (localSettingsRaw) {
+      try {
+        const localSettings = JSON.parse(localSettingsRaw);
+        const userSettingsRef = doc(db, "users", userId, "config", "settings");
+        
+        await setDoc(userSettingsRef, localSettings, { merge: true });
+        localStorage.removeItem("user_settings"); // Hapus agar tidak duplikat
+        console.log("Setelan Mushaf berhasil dicadangkan ke Cloud!");
+      } catch (e) {
+        console.error("Gagal migrasi:", e);
+      }
+    }
+  }
+</script>
