@@ -70,10 +70,10 @@
     if (localSettingsRaw) {
       try {
         const localSettings = JSON.parse(localSettingsRaw);
-        const userSettingsRef = doc(db, "users", userId, "config", "settings");
+        const userSettingsRef = doc(db, "users", userId, "config", "setelan");
         
         await setDoc(userSettingsRef, localSettings, { merge: true });
-        localStorage.removeItem("user_settings"); // Hapus agar tidak duplikat
+        //localStorage.removeItem("user_settings"); // Hapus agar tidak duplikat
         console.log("Setelan Mushaf berhasil dicadangkan ke Cloud!");
       } catch (e) {
         console.error("Gagal migrasi:", e);
